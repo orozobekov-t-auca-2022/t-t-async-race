@@ -5,6 +5,7 @@ on:
     branches:
       - "feature/**"
       - "fix/**"
+  workflow_dispatch:
 
 jobs:
   validate:
