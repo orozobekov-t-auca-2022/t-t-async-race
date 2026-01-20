@@ -2,7 +2,7 @@ export type Store<T> = {
   getState: () => T;
   setState: (patch: Partial<T>) => void;
   subscribe: (listener: () => void) => () => void;
-}
+};
 
 export function createStore<T>(initial: T): Store<T> {
   let state = initial;

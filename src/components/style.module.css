@@ -1,0 +1,44 @@
+.myBtn {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+.myInput {
+  width: 200px;
+  height: 30px;
+  font-size: 1rem;
+  padding: 0.4em 0.8em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+.myColorInput{
+  width: 50px;
+  height: 30px;
+  padding: 0.4em 0.8em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.myBtn:hover {
+  border-color: #646cff;
+}
+
+.myBtn:focus,
+.myBtn:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.myInput:focus {
+  outline: none;
+  border-color: #646cff;
+}
