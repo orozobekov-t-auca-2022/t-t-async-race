@@ -1,5 +1,4 @@
 import { myFormComponent } from '../../components/my-form.component';
-import { showCarView } from '../car/car.view';
 import styles from './styles.module.css';
 
 export function showGarageView(carsHtml: string): string {
