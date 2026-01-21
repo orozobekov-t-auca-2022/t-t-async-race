@@ -65,7 +65,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.cars-container{
+.cars-container {
   display: flex;
   flex-direction: column;
   gap: 15px;

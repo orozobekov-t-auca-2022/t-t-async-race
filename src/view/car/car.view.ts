@@ -4,8 +4,8 @@ export function showCarView(name: string, color: string): string {
   return `
     <div>
       <div class="${styles['car-controls']}">
-        <button class="${styles['car-btn']} ${styles['car-btn--select']}">Select</button>
-        <button class="${styles['car-btn']} ${styles['car-btn--delete']}">Delete</button>
+        <button id="select-car" class="${styles['car-btn']} ${styles['car-btn--select']}">Select</button>
+        <button id="delete-car" class="${styles['car-btn']} ${styles['car-btn--delete']}">Delete</button>
         <span class="${styles['car-name']}">${name}</span>
       </div>
       <div>

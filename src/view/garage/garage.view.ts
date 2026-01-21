@@ -1,12 +1,12 @@
 import { myFormComponent } from '../../components/my-form.component';
 import styles from './styles.module.css';
 
-export function showGarageView(carsHtml: string): string {
+export function showGarageView(carsHtml: string, total: number, currentPage: number, totalPages: number): string {
   return `
     <div class="${styles['garage-container']}">
       <div class="${styles['garage-header']}">
         <h2>Garage</h2>
-        <button class="garage-btn garage-btn--generate">Generate 100 Cars</button>
+        <button id="generate-cars" class="garage-btn garage-btn--generate">Generate 100 Cars</button>
       </div>
       
       <div class="${styles['garage-form-section']}">
@@ -18,10 +18,11 @@ export function showGarageView(carsHtml: string): string {
       </div>
       
       <div class="${styles['garage-pagination']}">
-        <button class="${styles['pagination-btn']}">Prev</button>
-        <span class="${styles['pagination-info']}">Page 1 of 10</span>
-        <button class="${styles['pagination-btn']}">Next</button>
+        <button id="prev-page" class="${styles['pagination-btn']}">Prev</button>
+        <span class="${styles['pagination-info']}">Page ${currentPage} of ${totalPages}</span>
+        <button id="next-page" class="${styles['pagination-btn']}">Next</button>
       </div>
+      <div class="${styles['garage-total']}">Total cars: ${total}</div>
     </div>
   `;
 }
