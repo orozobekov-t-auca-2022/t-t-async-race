@@ -2,8 +2,7 @@ import { createElement } from '../utils/dom';
 import { createStore } from '../state/store/store';
 import { initialState } from '../state/types';
 import { Router } from '../router';
-import { showGarageView } from '../view/garage/garage.view';
-import { showCarView } from '../view/car/car.view';
+import { GarageView } from '../view/garage/garage.view';
 
 export class App {
   private readonly store = createStore(initialState);
@@ -16,9 +15,11 @@ export class App {
 
   private readonly garageBtn: HTMLButtonElement = createElement('button');
   private readonly winnersBtn: HTMLButtonElement = createElement('button');
+  private readonly garageView: GarageView;
 
   public constructor(root: HTMLDivElement) {
     this.root = root;
+    this.garageView = new GarageView(this.content);
   }
 
   public mount(): void {
@@ -52,7 +53,6 @@ export class App {
   }
 
   private renderGarage(): void {
-    const carsHtml = `${showCarView('Car 1', '#ff0000')}${showCarView('Car 1', '#ff0000')}`;
-    this.content.innerHTML = showGarageView(carsHtml);
+    this.garageView.render();
   }
 }
