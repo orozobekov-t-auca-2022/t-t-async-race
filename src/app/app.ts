@@ -2,9 +2,8 @@ import { createElement } from '../utils/dom';
 import { createStore } from '../state/store/store';
 import { initialState } from '../state/types';
 import { Router } from '../router';
-import { showGarageView } from '../view/garage/garage.view';
-import { showCarView } from '../view/car/car.view';
-import { getAllCars, getCarById, createCar, updateCar, deleteCar } from '../api/garage.api';
+import { GarageView } from '../view/garage/garage.view';
+import { createCar, updateCar, deleteCar } from '../api/garage.api';
 
 export class App {
   private readonly store = createStore(initialState);
@@ -14,13 +13,16 @@ export class App {
   private readonly container: HTMLDivElement = createElement('div');
   private readonly nav: HTMLDivElement = createElement('div');
   private readonly content: HTMLDivElement = createElement('div');
-  private selectedCarId: number | null = null;
-
+  
   private readonly garageBtn: HTMLButtonElement = createElement('button');
   private readonly winnersBtn: HTMLButtonElement = createElement('button');
+  private readonly garageView: GarageView;
+  
+  private selectedCarId: number | null = null;
 
   public constructor(root: HTMLDivElement) {
     this.root = root;
+    this.garageView = new GarageView(this.content);
   }
 
   public mount(): void {
@@ -38,8 +40,9 @@ export class App {
 
     this.nav.append(this.garageBtn, this.winnersBtn);
     this.container.append(this.nav, this.content);
-
     this.root.append(this.container);
+
+    this.attachGarageListeners();
     this.store.subscribe(() => this.render());
     this.render();
     this.router.start();
@@ -54,152 +57,190 @@ export class App {
   }
 
   private async renderGarage(): Promise<void> {
-    this.content.innerHTML = showGarageView('<div>Loading...</div>', 0, this.store.getState().garagePage, 1);
+    const page = this.store.getState().garagePage;
+    await this.garageView.render(page);
+  }
+
+  private attachGarageListeners(): void {
+    this.content.addEventListener('click', (event) => {
+      const target = event.target;
+      if(!(target instanceof HTMLElement)) return;
+      const button = target.closest('button');
+      
+      if (!button) return;
+
+      const action = button.dataset.action;
+      const carElement = button.closest('[data-car-id]');
+      const carId = (carElement instanceof HTMLElement && carElement.dataset.carId) 
+        ? Number(carElement.dataset.carId) 
+        : null;
+
+      switch (action) {
+        case 'select': {
+          if (carId) void this.handleSelectCar(carId);
+          break;
+        }
+        case 'delete': {
+          if (carId) void this.handleDeleteCar(carId);
+          break;
+        }
+        case 'generate': {
+          void this.handleGenerateCars();
+          break;
+        }
+        case 'prev': {
+          void this.handlePrevPage();
+          break;
+        }
+        case 'next': {
+          void this.handleNextPage();
+          break;
+        }
+      }
+    });
+
+    const createForm = this.content.querySelector('fieldset:nth-of-type(1) .form-group');
+    const editForm = this.content.querySelector('fieldset:nth-of-type(2) .form-group');
+
+    if (createForm instanceof HTMLElement) {
+      const createButton = createForm.querySelector('button');
+      createButton?.addEventListener('click', (event) => {
+        event.preventDefault();
+        void this.handleCreateCar(createForm);
+      });
+    }
+
+    if (editForm instanceof HTMLElement) {
+      const editButton = editForm.querySelector('button');
+      editButton?.addEventListener('click', (event) => {
+        event.preventDefault();
+        void this.handleEditCar(editForm);
+      });
+    }
+  }
+
+  private async handleSelectCar(carId: number): Promise<void> {
+    const cars = this.garageView.getCars();
+    const car = cars.find(c => c.id === carId);
+    
+    if (!car) return;
+
+    this.selectedCarId = carId;
+    
+    const editForm = this.content.querySelector('fieldset:nth-of-type(2) .form-group');
+    if(!(editForm instanceof HTMLElement)) return;
+    const nameInput = editForm?.querySelector('input[type="text"]');
+    const colorInput = editForm?.querySelector('input[type="color"]');
+
+    if (nameInput instanceof HTMLInputElement && colorInput instanceof HTMLInputElement) {
+      nameInput.value = car.name;
+      colorInput.value = car.color;
+    }
+  }
+
+  private async handleDeleteCar(carId: number): Promise<void> {
     try {
-      const { cars, total } = await getAllCars(this.store.getState().garagePage);
-      const carsHtml = cars.map((car) => showCarView(car.name, car.color)).join('');
-      const totalPages = total % 7 === 0 ? total / 7 : Math.floor(total / 7) + 1;
-      this.content.innerHTML = showGarageView(carsHtml, total, this.store.getState().garagePage, totalPages);
-      this.attachAddCarListener();
-      this.attachDeleteCarListener();
-      this.attachSelectListener();
-      this.attachEditCarListener();
-      this.attachGenerateCarsListener();
-      this.attachPaginationListeners(totalPages);
+      await deleteCar(carId);
+      await this.renderGarage();
     } catch (error) {
-      this.content.innerHTML = showGarageView('<div>Error loading cars.</div>', 0, this.store.getState().garagePage, 1);
-      console.error('Failed to render garage:', error);
+      console.error('Failed to delete car:', error);
     }
   }
 
-  private async attachAddCarListener(): Promise<void> {
-    const form = this.content.querySelector('#create-car-form');
-    if (form) {
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const nameInput = form.querySelector('#car-name') as HTMLInputElement;
-        const colorInput = form.querySelector('#car-color') as HTMLInputElement;
-        console.log(nameInput, colorInput);
-        const name = nameInput.value;
-        const color = colorInput.value;
-        try {
-          await createCar(name, color);
-          await this.renderGarage();
-        } catch (error) {
-          console.error('Failed to add car:', error);
-        }
-      });
+  private async handleCreateCar(form: HTMLElement): Promise<void> {
+    const nameInput = form.querySelector('input[type="text"]');
+    const colorInput = form.querySelector('input[type="color"]');
+
+    if (!(nameInput instanceof HTMLInputElement) || !(colorInput instanceof HTMLInputElement)) return;
+
+    const name = nameInput.value.trim();
+    const color = colorInput.value;
+
+    if (!name) {
+      alert('Please enter a car name');
+      return;
+    }
+
+    try {
+      await createCar(name, color);
+      nameInput.value = '';
+      colorInput.value = '#000000';
+      await this.renderGarage();
+    } catch (error) {
+      console.error('Failed to create car:', error);
     }
   }
 
-  private async attachDeleteCarListener(): Promise<void> {
-    const deleteButtons = this.content.querySelectorAll(`#delete-car`);
-    if (deleteButtons) {
-      deleteButtons.forEach((deleteButton, index) => {
-        deleteButton.addEventListener('click', async (event) => {
-          event.preventDefault();
-          try {
-            const { cars } = await getAllCars(this.store.getState().garagePage);
-            const carId = cars[index].id;
-            await deleteCar(carId);
-            await this.renderGarage();
-          } catch (error) {
-            console.error('Failed to delete car:', error);
-          }
-        });
-      });
+  private async handleEditCar(form: HTMLElement): Promise<void> {
+    if (!this.selectedCarId) {
+      alert('Please select a car first');
+      return;
+    }
+
+    const nameInput = form.querySelector('input[type="text"]');
+    const colorInput = form.querySelector('input[type="color"]');
+
+    if (!(nameInput instanceof HTMLInputElement) || !(colorInput instanceof HTMLInputElement)) return;
+
+    const name = nameInput.value.trim();
+    const color = colorInput.value;
+
+    if (!name) {
+      alert('Please enter a car name');
+      return;
+    }
+
+    try {
+      await updateCar(this.selectedCarId, name, color);
+      this.selectedCarId = null;
+      nameInput.value = '';
+      colorInput.value = '#000000';
+      await this.renderGarage();
+    } catch (error) {
+      console.error('Failed to update car:', error);
     }
   }
 
-  private async attachSelectListener(): Promise<void> {
-    const selectButtons = this.content.querySelectorAll(`#select-car`);
-    if (selectButtons) {
-      selectButtons.forEach((selectButton, index) => {
-        selectButton.addEventListener('click', async (event) => {
-          event.preventDefault();
-          try {
-            const { cars } = await getAllCars(this.store.getState().garagePage);
-            const car = await getCarById(cars[index].id);
-            const editInput = this.content.querySelector('#edit-car-name') as HTMLInputElement;
-            const editColorInput = this.content.querySelector('#edit-car-color') as HTMLInputElement;
-            this.selectedCarId = car.id;
-            editInput.value = car.name;
-            editColorInput.value = car.color;
-          } catch (error) {
-            console.error('Failed to select car:', error);
-          }
-        });
-      });
+  private async handleGenerateCars(): Promise<void> {
+    const generateButton = this.content.querySelector('button[data-action="generate"]');
+    if (!(generateButton instanceof HTMLButtonElement)) {
+      return;
+    }
+    generateButton.disabled = true;
+    generateButton.textContent = 'Generating...';
+    try {
+      await this.generateRandomCars(100);
+      await this.renderGarage();
+    } finally {
+      generateButton.disabled = false;
+      generateButton.textContent = 'Generate Cars';
     }
   }
 
-  private async attachEditCarListener(): Promise<void> {
-    const form = this.content.querySelector('#edit-car-form');
-    if (form) {
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const nameInput = form.querySelector('#edit-car-name') as HTMLInputElement;
-        const colorInput = form.querySelector('#edit-car-color') as HTMLInputElement;
-        const name = nameInput.value;
-        const color = colorInput.value;
-        try {
-          const selectedCarId = this.selectedCarId;
-          if (selectedCarId === null) {
-            console.error('No car selected for editing.');
-            return;
-          }
-          await updateCar(selectedCarId, name, color);
-          await this.renderGarage();
-        } catch (error) {
-          console.error('Failed to edit car:', error);
-        }
-      });
+  private async generateRandomCars(count: number): Promise<void> {
+    const carNames = ['Ferrari', 'Lamborghini', 'McLaren', 'BMW', 'Audi', 'Mercedes', 'RedBull', 'Tesla', 'Toyota', 'Nissan', 'Aston Martin', 'Bugatti', 'Pagani', 'Koenigsegg', 'Porsche'];
+    const carColors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#33FFF5', '#F5FF33', '#FF33A8', '#A833FF', '#33FFA8', '#FFA833'];
+    const createPromises = [];
+
+    for (let i = 0; i < count; i++) {
+      const name = carNames[Math.floor(Math.random() * carNames.length)] + ' ' + Math.floor(Math.random() * 1000);
+      const color = carColors[Math.floor(Math.random() * carColors.length)];
+      createPromises.push(createCar(name, color));
+    }
+    await Promise.all(createPromises);
+  }
+
+  private async handlePrevPage(): Promise<void> {
+    const state = this.store.getState();
+    if (state.garagePage > 1) {
+      this.store.setState({ garagePage: state.garagePage - 1 });
+      await this.renderGarage();
     }
   }
 
-  private async attachGenerateCarsListener(): Promise<void> {
-    const generateButton = this.content.querySelector('#generate-cars');
-    if (generateButton) {
-      generateButton.addEventListener('click', async (event) => {
-        event.preventDefault();
-        try {
-          for (let i = 0; i < 100; i++) {
-            const name = `Car ${Math.floor(Math.random() * 1000)}`;
-            const color = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-            await createCar(name, color);
-          }
-          await this.renderGarage();
-        } catch (error) {
-          console.error('Failed to generate cars:', error);
-        }
-      });
-    }
-  }
-
-  private async attachPaginationListeners(totalPages: number): Promise<void> {
-    const previousButton = this.content.querySelector('#prev-page');
-    const nextButton = this.content.querySelector('#next-page');
-
-    if (previousButton) {
-      previousButton.addEventListener('click', async (event) => {
-        event.preventDefault();
-        const state = this.store.getState();
-        if (state.garagePage > 1) {
-          this.store.setState({ garagePage: state.garagePage - 1 });
-          await this.renderGarage();
-        }
-      });
-    }
-
-    if (nextButton) {
-      nextButton.addEventListener('click', async (event) => {
-        event.preventDefault();
-        const state = this.store.getState();
-        if (state.garagePage < totalPages) {
-          this.store.setState({ garagePage: state.garagePage + 1 });
-          await this.renderGarage();
-        }
-      });
-    }
+  private async handleNextPage(): Promise<void> {
+    const state = this.store.getState();
+    this.store.setState({ garagePage: state.garagePage + 1 });
+    await this.renderGarage();
   }
 }
