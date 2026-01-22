@@ -55,6 +55,7 @@ export function showGarageView(cars: HTMLElement[]): HTMLElement {
 export class GarageView {
   private readonly container: HTMLElement;
   private cars: Car[] = [];
+  private total: number = 0;
 
   public constructor(container: HTMLElement) {
     this.container = container;
@@ -64,9 +65,9 @@ export class GarageView {
     try {
       const { cars, total } = await getAllCars(page, CARS_PER_PAGE);
       this.cars = cars;
-
+      this.total = total;
       const totalPages = Math.max(1, Math.ceil(total / CARS_PER_PAGE));
-      const garageElement = this.createGarageElement(cars, total, page, totalPages);
+      const garageElement = this.createGarageElement(cars, page, totalPages);
       
       this.container.innerHTML = '';
       this.container.append(garageElement);
@@ -76,7 +77,7 @@ export class GarageView {
     }
   }
 
-  private createGarageElement(cars: Car[], total: number, currentPage: number, totalPages: number): HTMLElement {
+  private createGarageElement(cars: Car[], currentPage: number, totalPages: number): HTMLElement {
     const container = createElement('div');
     container.className = styles['garage-container'];
 
@@ -84,7 +85,7 @@ export class GarageView {
     header.className = styles['garage-header'];
     
     const title = createElement('h2');
-    title.textContent = `Garage (${total})`;
+    title.textContent = `Garage (${this.total})`;
     
     const generateButton = createElement('button');
     generateButton.className = 'garage-btn garage-btn--generate';

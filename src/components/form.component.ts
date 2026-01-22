@@ -13,11 +13,11 @@ export function createForm(): HTMLFormElement {
   
   const createGroup = createElement('div');
   createGroup.className = 'form-group';
-  createGroup.append(
-    createInput({ placeholder: 'Enter car name' }),
-    createColorInput({ placeholder: 'Enter car color' }),
-    createButton({ text: 'Add Car' })
-  );
+  const createNameInput = createInput({ placeholder: 'Enter car name' });
+  const createColor = createColorInput({ placeholder: 'Enter car color' });
+  const createSubmit = createButton({ text: 'Add Car' });
+  createSubmit.dataset.action = 'create';
+  createGroup.append(createNameInput, createColor, createSubmit);
   
   createFieldset.append(createLegend, createGroup);
 
@@ -27,11 +27,11 @@ export function createForm(): HTMLFormElement {
   
   const editGroup = createElement('div');
   editGroup.className = 'form-group';
-  editGroup.append(
-    createInput({ placeholder: 'Edit car name' }),
-    createColorInput({ placeholder: 'Edit car color' }),
-    createButton({ text: 'Edit Car' })
-  );
+  const editNameInput = createInput({ placeholder: 'Edit car name' });
+  const editColor = createColorInput({ placeholder: 'Edit car color' });
+  const editSubmit = createButton({ text: 'Edit Car' });
+  editSubmit.dataset.action = 'edit';
+  editGroup.append(editNameInput, editColor, editSubmit);
   
   editFieldset.append(editLegend, editGroup);
 

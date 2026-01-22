@@ -75,6 +75,8 @@ export class App {
         ? Number(carElement.dataset.carId) 
         : null;
 
+      const formGroup = button.closest('.form-group');
+
       switch (action) {
         case 'select': {
           if (carId) void this.handleSelectCar(carId);
@@ -88,6 +90,14 @@ export class App {
           void this.handleGenerateCars();
           break;
         }
+        case 'create': {
+          if (formGroup instanceof HTMLElement) void this.handleCreateCar(formGroup);
+          break;
+        }
+        case 'edit': {
+          if (formGroup instanceof HTMLElement) void this.handleEditCar(formGroup);
+          break;
+        }
         case 'prev': {
           void this.handlePrevPage();
           break;
@@ -98,25 +108,6 @@ export class App {
         }
       }
     });
-
-    const createForm = this.content.querySelector('fieldset:nth-of-type(1) .form-group');
-    const editForm = this.content.querySelector('fieldset:nth-of-type(2) .form-group');
-
-    if (createForm instanceof HTMLElement) {
-      const createButton = createForm.querySelector('button');
-      createButton?.addEventListener('click', (event) => {
-        event.preventDefault();
-        void this.handleCreateCar(createForm);
-      });
-    }
-
-    if (editForm instanceof HTMLElement) {
-      const editButton = editForm.querySelector('button');
-      editButton?.addEventListener('click', (event) => {
-        event.preventDefault();
-        void this.handleEditCar(editForm);
-      });
-    }
   }
 
   private async handleSelectCar(carId: number): Promise<void> {
@@ -213,7 +204,7 @@ export class App {
       await this.renderGarage();
     } finally {
       generateButton.disabled = false;
-      generateButton.textContent = 'Generate Cars';
+      generateButton.textContent = 'Generate 100 Cars';
     }
   }
 
