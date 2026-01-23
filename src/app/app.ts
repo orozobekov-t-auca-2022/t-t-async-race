@@ -4,6 +4,7 @@ import { initialState } from '../state/types';
 import { Router } from '../router';
 import { GarageView } from '../view/garage/garage.view';
 import { createCar, updateCar, deleteCar } from '../api/garage.api';
+import { startOrStopEngine } from '../api/engine.api';
 
 export class App {
   private readonly store = createStore(initialState);
@@ -106,8 +107,27 @@ export class App {
           void this.handleNextPage();
           break;
         }
-      }
-    });
+        case 'start': {
+          if (carId) void this.handleStartEngine(carId);
+          break;
+        }
+        case 'stop': {
+          if (carId) void this.handleStopEngine(carId);
+          break;
+        }
+        case 'race': {
+          void this.handleStartAll();
+          break;
+        }
+        case 'reset': {
+          void this.handleResetAll();
+          break;
+        }
+        case 'startAll': {
+          if (carId) void this.handleStartAll();
+          break;
+        }
+    }});
   }
 
   private async handleSelectCar(carId: number): Promise<void> {
@@ -233,5 +253,69 @@ export class App {
     const state = this.store.getState();
     this.store.setState({ garagePage: state.garagePage + 1 });
     await this.renderGarage();
+  }
+
+  private async handleStartEngine(carId: number): Promise<void> {
+    const carElement = this.content.querySelector(`[data-car-id="${carId}"]`);
+    if (!(carElement instanceof HTMLElement)) return;
+
+    const startButton = carElement.querySelector('button[data-action="start"]');
+    const stopButton = carElement.querySelector('button[data-action="stop"]');
+    const carPreview = carElement.querySelector('[data-car-element="true"]');
+
+    if (!(startButton instanceof HTMLButtonElement) || !(stopButton instanceof HTMLButtonElement) || !(carPreview instanceof HTMLElement)) return;
+
+    try {
+      startButton.disabled = true;
+      const { velocity, distance } = await startOrStopEngine(carId, 'started');
+      const duration = distance / velocity;
+      this.animateCar(carPreview, duration);
+      stopButton.disabled = false;
+    } catch (error) {
+      console.error('Failed to start engine:', error);
+    }
+  }
+
+  private animateCar(carElement: HTMLElement, duration: number): void {
+    const road = carElement.parentElement;
+
+    if (!(road instanceof HTMLElement)) return;
+
+    const carWidth = carElement.offsetWidth;
+    const roadWidth = road.offsetWidth;
+    const distance = roadWidth - carWidth;
+
+    carElement.style.transition = `transform ${duration}ms linear`;
+    carElement.style.transform = `translateX(${distance}px)`;
+  }
+
+  private async handleStopEngine(carId: number): Promise<void> {
+    const carElement = this.content.querySelector(`[data-car-id="${carId}"]`);
+
+    if (!(carElement instanceof HTMLElement)) return;
+
+    const startButton = carElement.querySelector('button[data-action="start"]');
+    const stopButton = carElement.querySelector('button[data-action="stop"]');
+    const carPreview = carElement.querySelector('[data-car-element="true"]');
+    
+    if (!(startButton instanceof HTMLButtonElement) || !(stopButton instanceof HTMLButtonElement) || !(carPreview instanceof HTMLElement)) return;
+
+    try {
+      stopButton.disabled = true;
+      await startOrStopEngine(carId, 'stopped');
+      carPreview.style.transition = '';
+      carPreview.style.transform = 'translateX(0)';
+      startButton.disabled = false;
+    } catch (error) {
+      console.error('Failed to stop engine:', error);
+    }
+  }
+
+  private async handleStartAll(): Promise<void> {
+    await Promise.all(this.garageView.getCars().map(car => this.handleStartEngine(car.id)));
+  }
+
+  private async handleResetAll(): Promise<void> {
+    await Promise.all(this.garageView.getCars().map(car => this.handleStopEngine(car.id)));
   }
 }

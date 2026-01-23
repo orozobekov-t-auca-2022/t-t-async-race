@@ -31,12 +31,13 @@ export function createCarView(car: Car): HTMLDivElement {
   const startButton = createButton({ text: 'A' });
   startButton.className = `${styles['car-btn']} ${styles['car-btn--start']}`;
   startButton.dataset.action = 'start';
+  startButton.id = `start-button`;
 
   const stopButton = createButton({ text: 'B' });
   stopButton.className = `${styles['car-btn']} ${styles['car-btn--stop']}`;
   stopButton.dataset.action = 'stop';
   stopButton.disabled = true;
-
+  stopButton.id = `stop-button`;
   raceSection.append(startButton, stopButton);
 
   const roadSection = createElement('div');

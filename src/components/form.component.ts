@@ -37,10 +37,11 @@ export function createForm(): HTMLFormElement {
 
   const formActions = createElement('div');
   formActions.className = 'form-actions';
-  formActions.append(
-    createButton({ text: 'Race' }),
-    createButton({ text: 'Reset' })
-  );
+  const raceButton = createButton({ text: 'Race' });
+  raceButton.dataset.action = 'race';
+  const resetButton = createButton({ text: 'Reset' });
+  resetButton.dataset.action = 'reset';
+  formActions.append(raceButton, resetButton);
 
   form.append(createFieldset, editFieldset, formActions);
   
