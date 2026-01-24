@@ -5,6 +5,8 @@ import { Router } from '../router';
 import { GarageView } from '../view/garage/garage.view';
 import { createCar, updateCar, deleteCar } from '../api/garage.api';
 import { startOrStopEngine } from '../api/engine.api';
+import type { Car } from '../models/car.model';
+import showWinnerMessage from '../components/winner-message.component';
 
 export class App {
   private readonly store = createStore(initialState);
@@ -229,12 +231,13 @@ export class App {
   }
 
   private async generateRandomCars(count: number): Promise<void> {
-    const carNames = ['Ferrari', 'Lamborghini', 'McLaren', 'BMW', 'Audi', 'Mercedes', 'RedBull', 'Tesla', 'Toyota', 'Nissan', 'Aston Martin', 'Bugatti', 'Pagani', 'Koenigsegg', 'Porsche'];
+    const carBrands = ['Ferrari', 'Lamborghini', 'McLaren', 'BMW', 'Audi', 'Mercedes', 'RedBull', 'Tesla', 'Toyota', 'Nissan', 'Aston Martin', 'Bugatti', 'Pagani', 'Koenigsegg', 'Porsche'];
+    const carModels = ['GT', 'Sport', 'X', 'Z', 'S', 'R', 'V', 'Q', 'L', 'M'];
     const carColors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#33FFF5', '#F5FF33', '#FF33A8', '#A833FF', '#33FFA8', '#FFA833'];
     const createPromises = [];
 
     for (let i = 0; i < count; i++) {
-      const name = carNames[Math.floor(Math.random() * carNames.length)] + ' ' + Math.floor(Math.random() * 1000);
+      const name = carBrands[Math.floor(Math.random() * carBrands.length)] + ' ' + carModels[Math.floor(Math.random() * carModels.length)];
       const color = carColors[Math.floor(Math.random() * carColors.length)];
       createPromises.push(createCar(name, color));
     }
@@ -255,7 +258,7 @@ export class App {
     await this.renderGarage();
   }
 
-  private async handleStartEngine(carId: number): Promise<void> {
+  private async handleStartEngine(carId: number): Promise<number | void> {
     const carElement = this.content.querySelector(`[data-car-id="${carId}"]`);
     if (!(carElement instanceof HTMLElement)) return;
 
@@ -271,6 +274,7 @@ export class App {
       const duration = distance / velocity;
       this.animateCar(carPreview, duration);
       stopButton.disabled = false;
+      return duration;
     } catch (error) {
       console.error('Failed to start engine:', error);
     }
@@ -312,7 +316,29 @@ export class App {
   }
 
   private async handleStartAll(): Promise<void> {
-    await Promise.all(this.garageView.getCars().map(car => this.handleStartEngine(car.id)));
+    const carTime = new Map<Car, number>();
+    await Promise.all(
+      this.garageView.getCars().map(async (car) => {
+        const time = await this.handleStartEngine(car.id);
+        carTime.set(car, time ?? 0);
+      })
+    ).then(() => {
+      let winner: Car | null = null;
+      let minTime = Infinity;
+
+      for (const [car, time] of carTime) {
+        if (time < minTime) {
+          minTime = time;
+          winner = car;
+        }
+      }
+
+      if (winner && minTime !== Infinity) {
+        setTimeout(() => {
+          showWinnerMessage(winner.name, minTime / 1000);
+        }, minTime);
+      }
+    });
   }
 
   private async handleResetAll(): Promise<void> {
