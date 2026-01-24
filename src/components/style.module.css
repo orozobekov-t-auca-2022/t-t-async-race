@@ -20,7 +20,7 @@
   border-radius: 4px;
   font-family: inherit;
 }
-.colorInput{
+.colorInput {
   width: 50px;
   height: 30px;
   padding: 0.4em 0.8em;
@@ -43,7 +43,7 @@
   border-color: #646cff;
 }
 
-.winner-message{
+.winner-message {
   background-color: transparent;
   display: flex;
   justify-content: center;
@@ -58,26 +58,34 @@
   z-index: 9999;
 }
 
-.winner-message__text{
+.winner-message__text {
   color: #0e0d0d;
   font-size: 40px;
   text-align: center;
-  animation: flicker 2s infinite linear alternate; 
+  animation: flicker 2s infinite linear alternate;
 }
 
 @keyframes flicker {
-  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+  0%,
+  18%,
+  22%,
+  25%,
+  53%,
+  57%,
+  100% {
     text-shadow:
       0 0 4px #fff,
       0 0 11px #fff,
       0 0 19px #fff,
-      0 0 40px #FF3,
-      0 0 80px #FF3,
-      0 0 90px #F90,
-      0 0 100px #F90,
-      0 0 150px #C33;
-    }
-  20%, 24%, 55% {       
+      0 0 40px #ff3,
+      0 0 80px #ff3,
+      0 0 90px #f90,
+      0 0 100px #f90,
+      0 0 150px #c33;
+  }
+  20%,
+  24%,
+  55% {
     text-shadow: none;
   }
 }

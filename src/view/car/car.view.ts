@@ -14,7 +14,7 @@ export function createCarView(car: Car): HTMLDivElement {
   const selectButton = createButton({ text: 'Select' });
   selectButton.className = `${styles['car-btn']} ${styles['car-btn--select']}`;
   selectButton.dataset.action = 'select';
-  
+
   const deleteButton = createButton({ text: 'Delete' });
   deleteButton.className = `${styles['car-btn']} ${styles['car-btn--delete']}`;
   deleteButton.dataset.action = 'delete';
@@ -72,7 +72,7 @@ function createCarSVG(color: string): SVGElement {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('fill', color);
   svg.setAttribute('viewBox', '0 0 324.018 324.017');
-  
+
   svg.innerHTML = `
     <g>
       <g>

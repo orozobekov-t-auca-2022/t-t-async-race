@@ -1,4 +1,4 @@
-import styles from './style.module.css'
+import styles from './style.module.css';
 
 export default function showWinnerMessage(carName: string, time: number): void {
   const container = document.createElement('div');
