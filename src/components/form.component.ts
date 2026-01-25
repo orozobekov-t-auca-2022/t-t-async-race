@@ -10,7 +10,7 @@ export function createForm(): HTMLFormElement {
   const createFieldset = createElement('fieldset');
   const createLegend = createElement('legend');
   createLegend.textContent = 'Create Car';
-  
+
   const createGroup = createElement('div');
   createGroup.className = 'form-group';
   const createNameInput = createInput({ placeholder: 'Enter car name' });
@@ -18,13 +18,13 @@ export function createForm(): HTMLFormElement {
   const createSubmit = createButton({ text: 'Add Car' });
   createSubmit.dataset.action = 'create';
   createGroup.append(createNameInput, createColor, createSubmit);
-  
+
   createFieldset.append(createLegend, createGroup);
 
   const editFieldset = createElement('fieldset');
   const editLegend = createElement('legend');
   editLegend.textContent = 'Edit Car';
-  
+
   const editGroup = createElement('div');
   editGroup.className = 'form-group';
   const editNameInput = createInput({ placeholder: 'Edit car name' });
@@ -32,7 +32,7 @@ export function createForm(): HTMLFormElement {
   const editSubmit = createButton({ text: 'Edit Car' });
   editSubmit.dataset.action = 'edit';
   editGroup.append(editNameInput, editColor, editSubmit);
-  
+
   editFieldset.append(editLegend, editGroup);
 
   const formActions = createElement('div');
@@ -44,6 +44,6 @@ export function createForm(): HTMLFormElement {
   formActions.append(raceButton, resetButton);
 
   form.append(createFieldset, editFieldset, formActions);
-  
+
   return form;
 }

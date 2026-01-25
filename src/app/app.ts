@@ -5,6 +5,8 @@ import { Router } from '../router';
 import { GarageView } from '../view/garage/garage.view';
 import { createCar, updateCar, deleteCar } from '../api/garage.api';
 import { startOrStopEngine } from '../api/engine.api';
+import type { Car } from '../models/car.model';
+import showWinnerMessage from '../components/winner-message.component';
 
 export class App {
   private readonly store = createStore(initialState);
@@ -14,11 +16,11 @@ export class App {
   private readonly container: HTMLDivElement = createElement('div');
   private readonly nav: HTMLDivElement = createElement('div');
   private readonly content: HTMLDivElement = createElement('div');
-  
+
   private readonly garageBtn: HTMLButtonElement = createElement('button');
   private readonly winnersBtn: HTMLButtonElement = createElement('button');
   private readonly garageView: GarageView;
-  
+
   private selectedCarId: number | null = null;
 
   public constructor(root: HTMLDivElement) {
@@ -65,16 +67,15 @@ export class App {
   private attachGarageListeners(): void {
     this.content.addEventListener('click', (event) => {
       const target = event.target;
-      if(!(target instanceof HTMLElement)) return;
+      if (!(target instanceof HTMLElement)) return;
       const button = target.closest('button');
-      
+
       if (!button) return;
 
       const action = button.dataset.action;
       const carElement = button.closest('[data-car-id]');
-      const carId = (carElement instanceof HTMLElement && carElement.dataset.carId) 
-        ? Number(carElement.dataset.carId) 
-        : null;
+      const carId =
+        carElement instanceof HTMLElement && carElement.dataset.carId ? Number(carElement.dataset.carId) : null;
 
       const formGroup = button.closest('.form-group');
 
@@ -127,19 +128,20 @@ export class App {
           if (carId) void this.handleStartAll();
           break;
         }
-    }});
+      }
+    });
   }
 
   private async handleSelectCar(carId: number): Promise<void> {
     const cars = this.garageView.getCars();
-    const car = cars.find(c => c.id === carId);
-    
+    const car = cars.find((c) => c.id === carId);
+
     if (!car) return;
 
     this.selectedCarId = carId;
-    
+
     const editForm = this.content.querySelector('fieldset:nth-of-type(2) .form-group');
-    if(!(editForm instanceof HTMLElement)) return;
+    if (!(editForm instanceof HTMLElement)) return;
     const nameInput = editForm?.querySelector('input[type="text"]');
     const colorInput = editForm?.querySelector('input[type="color"]');
 
@@ -229,12 +231,43 @@ export class App {
   }
 
   private async generateRandomCars(count: number): Promise<void> {
-    const carNames = ['Ferrari', 'Lamborghini', 'McLaren', 'BMW', 'Audi', 'Mercedes', 'RedBull', 'Tesla', 'Toyota', 'Nissan', 'Aston Martin', 'Bugatti', 'Pagani', 'Koenigsegg', 'Porsche'];
-    const carColors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#33FFF5', '#F5FF33', '#FF33A8', '#A833FF', '#33FFA8', '#FFA833'];
+    const carBrands = [
+      'Ferrari',
+      'Lamborghini',
+      'McLaren',
+      'BMW',
+      'Audi',
+      'Mercedes',
+      'RedBull',
+      'Tesla',
+      'Toyota',
+      'Nissan',
+      'Aston Martin',
+      'Bugatti',
+      'Pagani',
+      'Koenigsegg',
+      'Porsche',
+    ];
+    const carModels = ['GT', 'Sport', 'X', 'Z', 'S', 'R', 'V', 'Q', 'L', 'M'];
+    const carColors = [
+      '#FF5733',
+      '#33FF57',
+      '#3357FF',
+      '#F333FF',
+      '#33FFF5',
+      '#F5FF33',
+      '#FF33A8',
+      '#A833FF',
+      '#33FFA8',
+      '#FFA833',
+    ];
     const createPromises = [];
 
     for (let i = 0; i < count; i++) {
-      const name = carNames[Math.floor(Math.random() * carNames.length)] + ' ' + Math.floor(Math.random() * 1000);
+      const name =
+        carBrands[Math.floor(Math.random() * carBrands.length)] +
+        ' ' +
+        carModels[Math.floor(Math.random() * carModels.length)];
       const color = carColors[Math.floor(Math.random() * carColors.length)];
       createPromises.push(createCar(name, color));
     }
@@ -255,7 +288,7 @@ export class App {
     await this.renderGarage();
   }
 
-  private async handleStartEngine(carId: number): Promise<void> {
+  private async handleStartEngine(carId: number): Promise<number | void> {
     const carElement = this.content.querySelector(`[data-car-id="${carId}"]`);
     if (!(carElement instanceof HTMLElement)) return;
 
@@ -263,7 +296,12 @@ export class App {
     const stopButton = carElement.querySelector('button[data-action="stop"]');
     const carPreview = carElement.querySelector('[data-car-element="true"]');
 
-    if (!(startButton instanceof HTMLButtonElement) || !(stopButton instanceof HTMLButtonElement) || !(carPreview instanceof HTMLElement)) return;
+    if (
+      !(startButton instanceof HTMLButtonElement) ||
+      !(stopButton instanceof HTMLButtonElement) ||
+      !(carPreview instanceof HTMLElement)
+    )
+      return;
 
     try {
       startButton.disabled = true;
@@ -271,6 +309,7 @@ export class App {
       const duration = distance / velocity;
       this.animateCar(carPreview, duration);
       stopButton.disabled = false;
+      return duration * 1000;
     } catch (error) {
       console.error('Failed to start engine:', error);
     }
@@ -297,8 +336,13 @@ export class App {
     const startButton = carElement.querySelector('button[data-action="start"]');
     const stopButton = carElement.querySelector('button[data-action="stop"]');
     const carPreview = carElement.querySelector('[data-car-element="true"]');
-    
-    if (!(startButton instanceof HTMLButtonElement) || !(stopButton instanceof HTMLButtonElement) || !(carPreview instanceof HTMLElement)) return;
+
+    if (
+      !(startButton instanceof HTMLButtonElement) ||
+      !(stopButton instanceof HTMLButtonElement) ||
+      !(carPreview instanceof HTMLElement)
+    )
+      return;
 
     try {
       stopButton.disabled = true;
@@ -312,10 +356,59 @@ export class App {
   }
 
   private async handleStartAll(): Promise<void> {
-    await Promise.all(this.garageView.getCars().map(car => this.handleStartEngine(car.id)));
+    const cars = this.garageView.getCars();
+    const carTime = new Map<Car, number>();
+
+    const results = await Promise.allSettled(cars.map((car) => startOrStopEngine(car.id, 'started')));
+
+    results.forEach((result, index) => {
+      if (result.status !== 'fulfilled') return;
+
+      const car = cars[index];
+      const carElement = this.content.querySelector(`[data-car-id="${car.id}"] [data-car-element="true"]`);
+
+      if (!(carElement instanceof HTMLElement)) return;
+
+      carElement.style.transition = 'none';
+      carElement.style.transform = 'translateX(0)';
+      void carElement.offsetWidth;
+    });
+
+    requestAnimationFrame(() => {
+      results.forEach((result, index) => {
+        if (result.status !== 'fulfilled') return;
+
+        const { velocity, distance } = result.value;
+        const car = cars[index];
+        const carElement = this.content.querySelector(`[data-car-id="${car.id}"] [data-car-element="true"]`);
+
+        if (!(carElement instanceof HTMLElement)) return;
+
+        const duration = distance / velocity;
+
+        this.animateCar(carElement, duration);
+        carTime.set(car, duration);
+      });
+
+      let winner: Car | null = null;
+      let minTime = Infinity;
+
+      for (const [car, time] of carTime) {
+        if (time < minTime) {
+          minTime = time;
+          winner = car;
+        }
+      }
+
+      if (winner) {
+        setTimeout(() => {
+          showWinnerMessage(winner.name, minTime);
+        }, minTime);
+      }
+    });
   }
 
   private async handleResetAll(): Promise<void> {
-    await Promise.all(this.garageView.getCars().map(car => this.handleStopEngine(car.id)));
+    await Promise.all(this.garageView.getCars().map((car) => this.handleStopEngine(car.id)));
   }
 }
