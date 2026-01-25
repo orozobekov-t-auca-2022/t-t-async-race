@@ -5,6 +5,7 @@ import styles from './styles.module.css';
 import type { Car } from '../../models/car.model';
 import { getAllCars } from '../../api/garage.api';
 import { CARS_PER_PAGE } from '../../constants';
+import { createButton } from '../../components/button.component';
 
 export function showGarageView(cars: HTMLElement[]): HTMLElement {
   const container = createElement('div');
@@ -87,9 +88,8 @@ export class GarageView {
     const title = createElement('h2');
     title.textContent = `Garage (${this.total})`;
 
-    const generateButton = createElement('button');
-    generateButton.className = 'garage-btn garage-btn--generate';
-    generateButton.textContent = 'Generate 100 Cars';
+    const generateButton = createButton({ type: 'button', text: 'Generate 100 Cars' });
+    generateButton.className = styles['button'];
     generateButton.dataset.action = 'generate';
 
     header.append(title, generateButton);
@@ -111,9 +111,8 @@ export class GarageView {
     const pagination = createElement('div');
     pagination.className = styles['garage-pagination'];
 
-    const previousButton = createElement('button');
-    previousButton.className = `${styles['pagination-btn']} pagination-prev`;
-    previousButton.textContent = 'Prev';
+    const previousButton = createButton({ type: 'button', text: 'Prev' });
+    previousButton.className = `${styles['button']} pagination-prev`;
     previousButton.dataset.action = 'prev';
     previousButton.disabled = currentPage === 1;
 
@@ -121,9 +120,8 @@ export class GarageView {
     pageInfo.className = styles['pagination-info'];
     pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
 
-    const nextButton = createElement('button');
-    nextButton.className = `${styles['pagination-btn']} pagination-next`;
-    nextButton.textContent = 'Next';
+    const nextButton = createButton({ type: 'button', text: 'Next' });
+    nextButton.className = `${styles['button']} pagination-next`;
     nextButton.dataset.action = 'next';
     nextButton.disabled = currentPage === totalPages;
 
