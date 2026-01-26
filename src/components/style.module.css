@@ -10,7 +10,10 @@
   cursor: pointer;
   transition: border-color 0.25s;
 }
-
+.button:disabled {
+  cursor: not-allowed;
+  border: transparent;
+}
 .input {
   width: 200px;
   height: 30px;
@@ -29,19 +32,23 @@
   font-family: inherit;
 }
 
+
 .button:hover {
   border-color: #646cff;
 }
+
 
 .button:focus,
 .button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+
 .input:focus {
   outline: none;
   border-color: #646cff;
 }
+
 
 .winner-message {
   background-color: transparent;
@@ -58,12 +65,35 @@
   z-index: 9999;
 }
 
+
 .winner-message__text {
   color: #0e0d0d;
   font-size: 40px;
   text-align: center;
   animation: flicker 2s infinite linear alternate;
 }
+
+
+.form{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+.form-group {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+
+.form-actions{
+  display: flex;
+  gap: 15px;
+}
+
 
 @keyframes flicker {
   0%,

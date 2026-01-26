@@ -434,8 +434,8 @@ export class App {
 
       if (winner) {
         setTimeout(() => {
-          showWinnerMessage(winner.name, minTime);
-          void this.saveWinner(winner.id, minTime);
+          showWinnerMessage(winner.name, minTime / 1000);
+          void this.saveWinner(winner.id, minTime / 1000);
         }, minTime);
       }
     });

@@ -42,9 +42,6 @@
   transition: border-color 0.25s;
 }
 
-.garage-btn:hover {
-  border-color: blue;
-}
 
 .garage-btn:disabled {
   opacity: 0.5;

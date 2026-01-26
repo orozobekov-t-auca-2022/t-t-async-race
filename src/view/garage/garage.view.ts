@@ -86,13 +86,9 @@ export class GarageView {
     header.className = styles['garage-header'];
 
     const title = createElement('h2');
-    title.textContent = `Garage (${this.total})`;
+    title.textContent = `Garage (Total: ${this.total} cars)`;
 
-    const generateButton = createButton({ type: 'button', text: 'Generate 100 Cars' });
-    generateButton.className = styles['button'];
-    generateButton.dataset.action = 'generate';
-
-    header.append(title, generateButton);
+    header.append(title);
 
     const formSection = createElement('div');
     formSection.className = styles['garage-form-section'];
