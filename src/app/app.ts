@@ -6,7 +6,7 @@ import { GarageView } from '../view/garage/garage.view';
 import { WinnersView } from '../view/winners/winners.view';
 import { createCar, updateCar, deleteCar } from '../api/garage.api';
 import { startOrStopEngine } from '../api/engine.api';
-import { getWinnerById, createWinner, updateWinner } from '../api/winner.api';
+import { getWinnerById, createWinner, updateWinner, deleteWinner } from '../api/winner.api';
 import type { Car } from '../models/car.model';
 import showWinnerMessage from '../components/winner-message.component';
 
@@ -171,6 +171,11 @@ export class App {
   private async handleDeleteCar(carId: number): Promise<void> {
     try {
       await deleteCar(carId);
+      try {
+        await deleteWinner(carId);
+      } catch (error) {
+        console.error('No winner record to delete for this car:', error);
+      }
       await this.renderGarage();
     } catch (error) {
       console.error('Failed to delete car:', error);
@@ -434,8 +439,8 @@ export class App {
 
       if (winner) {
         setTimeout(() => {
-          showWinnerMessage(winner.name, minTime);
-          void this.saveWinner(winner.id, minTime);
+          showWinnerMessage(winner.name, minTime / 1000);
+          void this.saveWinner(winner.id, minTime / 1000);
         }, minTime);
       }
     });
