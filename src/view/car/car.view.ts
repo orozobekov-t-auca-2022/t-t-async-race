@@ -68,7 +68,7 @@ export function createCarView(car: Car): HTMLDivElement {
   return carContainer;
 }
 
-function createCarSVG(color: string): SVGElement {
+export function createCarSVG(color: string): SVGElement {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('fill', color);
   svg.setAttribute('viewBox', '0 0 324.018 324.017');
