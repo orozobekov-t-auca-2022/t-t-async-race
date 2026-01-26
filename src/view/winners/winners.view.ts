@@ -113,7 +113,7 @@ export class WinnersView {
     winsText.textContent = 'Wins';
     const winsArrow = createElement('span');
     winsArrow.className = styles['sort-arrow'];
-    
+
     if (this.currentSort === 'wins') {
       winsArrow.textContent = this.currentOrder === 'ASC' ? '▲' : '▼';
       winsArrow.classList.add(styles['active']);

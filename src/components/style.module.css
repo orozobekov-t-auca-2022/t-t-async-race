@@ -55,23 +55,19 @@
   border-color: #646cff;
 }
 
-
 .button:hover {
   border-color: #646cff;
 }
-
 
 .button:focus,
 .button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-
 .input:focus {
   outline: none;
   border-color: #646cff;
 }
-
 
 .winner-message {
   background-color: transparent;
@@ -88,7 +84,6 @@
   z-index: 9999;
 }
 
-
 .winner-message__text {
   color: #0e0d0d;
   font-size: 40px;
@@ -96,8 +91,7 @@
   animation: flicker 2s infinite linear alternate;
 }
 
-
-.form{
+.form {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -126,13 +120,11 @@
   align-items: center;
 }
 
-
-.form-actions{
+.form-actions {
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
 }
-
 
 @media (max-width: 768px) {
   .form-group {
@@ -177,7 +169,6 @@
     padding: 0.7rem 1rem;
   }
 }
-
 
 @keyframes flicker {
   0%,

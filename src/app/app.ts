@@ -222,12 +222,12 @@ export class App {
       this.selectedCarId = null;
       nameInput.value = '';
       colorInput.value = '#000000';
-     
+
       const editFieldset = this.content.querySelector('fieldset[data-form="edit"]');
       if (editFieldset instanceof HTMLFieldSetElement) {
         editFieldset.disabled = true;
       }
-     
+
       await this.renderGarage();
     } catch (error) {
       console.error('Failed to update car:', error);
