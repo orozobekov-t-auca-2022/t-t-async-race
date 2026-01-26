@@ -3,6 +3,7 @@ button:disabled {
   cursor: not-allowed;
   border: transparent;
   opacity: 0.5;
+  background-color: #999;
 }
 
 .cars-container {
