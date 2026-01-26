@@ -2,6 +2,8 @@
 
 A single-page application (SPA) for managing a garage of cars, operating their engines, and viewing race statistics. Built with TypeScript, vanilla DOM manipulation, and a custom state management system.
 
+**Note: Before running an application, you have to clone server repository. Both frontend and backend should run simultaniously. For more information about the server repo refer to [server repo link](https://github.com/mikhama/async-race-api)**
+
 ## 📋 Table of Contents
 
 - [Features](#features)
