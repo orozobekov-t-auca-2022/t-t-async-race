@@ -120,3 +120,10 @@ The application requires to start both frontend and backend server at the same t
 `POST /winners` - Create winner record
 `PUT /winners/{id}` - Update winner
 `DELETE /winners/{id}` - Delete winner
+
+
+### 🤝 Contributing
+1. Fork the repository
+2. Create a ```feature/some_feature``` branch from the ```develop``` branch. Or if you want to fix something, then create fix branch ```fix/some_fix``` from the ```develop``` branch.
+3. Commit changes with clear messages
+4. Open a pull request from feature or fix branch to the develop branch
