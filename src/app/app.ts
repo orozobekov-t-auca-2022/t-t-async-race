@@ -15,7 +15,7 @@ export class App {
   private readonly router = new Router(this.store);
 
   private readonly root: HTMLDivElement;
-  private readonly container: HTMLDivElement = createElement('div');
+  private readonly container: HTMLElement = createElement('main');
   private readonly nav: HTMLDivElement = createElement('div');
   private readonly content: HTMLDivElement = createElement('div');
 
