@@ -125,7 +125,7 @@ export class App {
           break;
         }
         case 'startAll': {
-          if (carId) void this.handleStartAll();
+          void this.handleStartAll();
           break;
         }
       }
@@ -140,8 +140,13 @@ export class App {
 
     this.selectedCarId = carId;
 
+    const editFieldset = this.content.querySelector('fieldset:nth-of-type(2)');
+    if (!(editFieldset instanceof HTMLFieldSetElement)) return;
+    editFieldset.disabled = false;
+
     const editForm = this.content.querySelector('fieldset:nth-of-type(2) .form-group');
     if (!(editForm instanceof HTMLElement)) return;
+
     const nameInput = editForm?.querySelector('input[type="text"]');
     const colorInput = editForm?.querySelector('input[type="color"]');
 
@@ -209,6 +214,10 @@ export class App {
       nameInput.value = '';
       colorInput.value = '#000000';
       await this.renderGarage();
+
+      const editFieldset = this.content.querySelector('fieldset:nth-of-type(2)');
+      if (!(editFieldset instanceof HTMLFieldSetElement)) return;
+      editFieldset.disabled = true;
     } catch (error) {
       console.error('Failed to update car:', error);
     }
@@ -303,6 +312,8 @@ export class App {
     )
       return;
 
+    startButton.disabled = false;
+    stopButton.disabled = true;
     try {
       startButton.disabled = true;
       const { velocity, distance } = await startOrStopEngine(carId, 'started');
@@ -374,6 +385,15 @@ export class App {
       void carElement.offsetWidth;
     });
 
+    const resetButton = this.content.querySelector('button[data-action="reset"]');
+    const startAllButton = this.content.querySelector('button[data-action="race"]');
+    if (startAllButton instanceof HTMLButtonElement) {
+      startAllButton.disabled = true;
+    }
+    if (resetButton instanceof HTMLButtonElement) {
+      resetButton.disabled = false;
+    }
+
     requestAnimationFrame(() => {
       results.forEach((result, index) => {
         if (result.status !== 'fulfilled') return;
@@ -410,5 +430,13 @@ export class App {
 
   private async handleResetAll(): Promise<void> {
     await Promise.all(this.garageView.getCars().map((car) => this.handleStopEngine(car.id)));
+    const resetButton = this.content.querySelector('button[data-action="reset"]');
+    const startAllButton = this.content.querySelector('button[data-action="race"]');
+    if (startAllButton instanceof HTMLButtonElement) {
+      startAllButton.disabled = false;
+    }
+    if (resetButton instanceof HTMLButtonElement) {
+      resetButton.disabled = true;
+    }
   }
 }

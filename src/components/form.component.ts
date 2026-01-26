@@ -5,7 +5,7 @@ import { createElement } from '../utils/dom';
 
 export function createForm(): HTMLFormElement {
   const form = createElement('form');
-  form.className = 'my-form';
+  form.className = 'form';
 
   const createFieldset = createElement('fieldset');
   const createLegend = createElement('legend');
@@ -34,6 +34,7 @@ export function createForm(): HTMLFormElement {
   editGroup.append(editNameInput, editColor, editSubmit);
 
   editFieldset.append(editLegend, editGroup);
+  editFieldset.disabled = true;
 
   const formActions = createElement('div');
   formActions.className = 'form-actions';
@@ -41,6 +42,8 @@ export function createForm(): HTMLFormElement {
   raceButton.dataset.action = 'race';
   const resetButton = createButton({ text: 'Reset' });
   resetButton.dataset.action = 'reset';
+  resetButton.disabled = true;
+  resetButton.id = 'reset-button';
   formActions.append(raceButton, resetButton);
 
   form.append(createFieldset, editFieldset, formActions);
