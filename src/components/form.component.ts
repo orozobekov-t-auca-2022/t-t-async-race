@@ -9,6 +9,7 @@ export function createForm(): HTMLFormElement {
   form.className = styles.form;
 
   const createFieldset = createElement('fieldset');
+  createFieldset.dataset.form = 'create';
   const createLegend = createElement('legend');
   createLegend.textContent = 'Create Car';
 
@@ -23,6 +24,8 @@ export function createForm(): HTMLFormElement {
   createFieldset.append(createLegend, createGroup);
 
   const editFieldset = createElement('fieldset');
+  editFieldset.dataset.form = 'edit';
+  editFieldset.disabled = true;
   const editLegend = createElement('legend');
   editLegend.textContent = 'Edit Car';
 
@@ -35,7 +38,6 @@ export function createForm(): HTMLFormElement {
   editGroup.append(editNameInput, editColor, editSubmit);
 
   editFieldset.append(editLegend, editGroup);
-  editFieldset.disabled = true;
 
   const formActions = createElement('div');
   formActions.className = styles['form-actions'];

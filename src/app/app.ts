@@ -6,7 +6,7 @@ import { GarageView } from '../view/garage/garage.view';
 import { WinnersView } from '../view/winners/winners.view';
 import { createCar, updateCar, deleteCar } from '../api/garage.api';
 import { startOrStopEngine } from '../api/engine.api';
-import { getWinnerById, createWinner, updateWinner, deleteWinner } from '../api/winner.api';
+import { getWinnerById, createWinner, updateWinner } from '../api/winner.api';
 import type { Car } from '../models/car.model';
 import showWinnerMessage from '../components/winner-message.component';
 
@@ -89,8 +89,6 @@ export class App {
       const carId =
         carElement instanceof HTMLElement && carElement.dataset.carId ? Number(carElement.dataset.carId) : null;
 
-      const formGroup = button.closest('.form-group');
-
       switch (action) {
         case 'select': {
           if (carId) void this.handleSelectCar(carId);
@@ -105,11 +103,13 @@ export class App {
           break;
         }
         case 'create': {
-          if (formGroup instanceof HTMLElement) void this.handleCreateCar(formGroup);
+          const createFieldset = button.closest('fieldset[data-form="create"]');
+          if (createFieldset instanceof HTMLElement) void this.handleCreateCar(createFieldset);
           break;
         }
         case 'edit': {
-          if (formGroup instanceof HTMLElement) void this.handleEditCar(formGroup);
+          const editFieldset = button.closest('fieldset[data-form="edit"]');
+          if (editFieldset instanceof HTMLElement) void this.handleEditCar(editFieldset);
           break;
         }
         case 'prev': {
@@ -149,18 +149,15 @@ export class App {
     const car = cars.find((c) => c.id === carId);
 
     if (!car) return;
-
     this.selectedCarId = carId;
 
-    const editFieldset = this.content.querySelector('fieldset:nth-of-type(2)');
-    if (!(editFieldset instanceof HTMLFieldSetElement)) return;
-    editFieldset.disabled = false;
+    const editFieldset = this.content.querySelector('fieldset[data-form="edit"]');
+    if (editFieldset instanceof HTMLFieldSetElement) {
+      editFieldset.disabled = false;
+    }
 
-    const editForm = this.content.querySelector('fieldset:nth-of-type(2) .form-group');
-    if (!(editForm instanceof HTMLElement)) return;
-
-    const nameInput = editForm?.querySelector('input[type="text"]');
-    const colorInput = editForm?.querySelector('input[type="color"]');
+    const nameInput = editFieldset?.querySelector('input[type="text"]');
+    const colorInput = editFieldset?.querySelector('input[type="color"]');
 
     if (nameInput instanceof HTMLInputElement && colorInput instanceof HTMLInputElement) {
       nameInput.value = car.name;
@@ -171,11 +168,6 @@ export class App {
   private async handleDeleteCar(carId: number): Promise<void> {
     try {
       await deleteCar(carId);
-      try {
-        await deleteWinner(carId);
-      } catch (error) {
-        console.error('No winner record to delete for this car:', error);
-      }
       await this.renderGarage();
     } catch (error) {
       console.error('Failed to delete car:', error);
@@ -230,11 +222,13 @@ export class App {
       this.selectedCarId = null;
       nameInput.value = '';
       colorInput.value = '#000000';
+     
+      const editFieldset = this.content.querySelector('fieldset[data-form="edit"]');
+      if (editFieldset instanceof HTMLFieldSetElement) {
+        editFieldset.disabled = true;
+      }
+     
       await this.renderGarage();
-
-      const editFieldset = this.content.querySelector('fieldset:nth-of-type(2)');
-      if (!(editFieldset instanceof HTMLFieldSetElement)) return;
-      editFieldset.disabled = true;
     } catch (error) {
       console.error('Failed to update car:', error);
     }
