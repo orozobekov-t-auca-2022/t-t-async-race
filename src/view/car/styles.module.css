@@ -1,6 +1,7 @@
 button:disabled {
   cursor: not-allowed;
   border: transparent;
+  background-color: #999;
 }
 
 .cars-container {
