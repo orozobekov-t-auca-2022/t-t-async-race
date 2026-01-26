@@ -1,10 +1,12 @@
 import { createElement } from '../utils/dom';
 import { createStore } from '../state/store/store';
-import { initialState } from '../state/types';
+import { initialState, type SortField, type SortOrder } from '../state/types';
 import { Router } from '../router';
 import { GarageView } from '../view/garage/garage.view';
+import { WinnersView } from '../view/winners/winners.view';
 import { createCar, updateCar, deleteCar } from '../api/garage.api';
 import { startOrStopEngine } from '../api/engine.api';
+import { getWinnerById, createWinner, updateWinner } from '../api/winner.api';
 import type { Car } from '../models/car.model';
 import showWinnerMessage from '../components/winner-message.component';
 
@@ -20,12 +22,14 @@ export class App {
   private readonly garageBtn: HTMLButtonElement = createElement('button');
   private readonly winnersBtn: HTMLButtonElement = createElement('button');
   private readonly garageView: GarageView;
+  private readonly winnersView: WinnersView;
 
   private selectedCarId: number | null = null;
 
   public constructor(root: HTMLDivElement) {
     this.root = root;
     this.garageView = new GarageView(this.content);
+    this.winnersView = new WinnersView(this.content);
   }
 
   public mount(): void {
@@ -46,6 +50,7 @@ export class App {
     this.root.append(this.container);
 
     this.attachGarageListeners();
+    this.attachWinnersListeners();
     this.store.subscribe(() => this.render());
     this.render();
     this.router.start();
@@ -56,12 +61,19 @@ export class App {
 
     if (state.route === 'garage') {
       void this.renderGarage();
+    } else if (state.route === 'winners') {
+      void this.renderWinners();
     }
   }
 
   private async renderGarage(): Promise<void> {
     const page = this.store.getState().garagePage;
     await this.garageView.render(page);
+  }
+
+  private async renderWinners(): Promise<void> {
+    const state = this.store.getState();
+    await this.winnersView.render(state.winnersPage, state.winnersSort, state.winnersSortOrder);
   }
 
   private attachGarageListeners(): void {
@@ -423,9 +435,26 @@ export class App {
       if (winner) {
         setTimeout(() => {
           showWinnerMessage(winner.name, minTime);
+          void this.saveWinner(winner.id, minTime);
         }, minTime);
       }
     });
+  }
+
+  private async saveWinner(carId: number, time: number): Promise<void> {
+    try {
+      const existingWinner = await getWinnerById(carId);
+
+      const newWins = existingWinner.wins + 1;
+      const newBestTime = Math.min(existingWinner.time, time);
+      await updateWinner(carId, newWins, newBestTime);
+    } catch {
+      try {
+        await createWinner(carId, time);
+      } catch (createError) {
+        console.error('Failed to create winner:', createError);
+      }
+    }
   }
 
   private async handleResetAll(): Promise<void> {
@@ -438,5 +467,70 @@ export class App {
     if (resetButton instanceof HTMLButtonElement) {
       resetButton.disabled = true;
     }
+  }
+
+  private attachWinnersListeners(): void {
+    this.content.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const button = target.closest('button');
+
+      if (!button) return;
+
+      const action = button.dataset.action;
+
+      switch (action) {
+        case 'prev-winners': {
+          void this.handlePrevWinnersPage();
+          break;
+        }
+        case 'next-winners': {
+          void this.handleNextWinnersPage();
+          break;
+        }
+      }
+    });
+
+    this.content.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const th = target.closest('th[data-sort]');
+
+      if (th instanceof HTMLElement && th.dataset.sort) {
+        const sortField = th.dataset.sort as SortField;
+        void this.handleSort(sortField);
+      }
+    });
+  }
+
+  private async handlePrevWinnersPage(): Promise<void> {
+    const state = this.store.getState();
+    if (state.winnersPage > 1) {
+      this.store.setState({ winnersPage: state.winnersPage - 1 });
+      await this.renderWinners();
+    }
+  }
+
+  private async handleNextWinnersPage(): Promise<void> {
+    const state = this.store.getState();
+    this.store.setState({ winnersPage: state.winnersPage + 1 });
+    await this.renderWinners();
+  }
+
+  private async handleSort(field: SortField): Promise<void> {
+    const state = this.store.getState();
+    let newOrder: SortOrder = 'DESC';
+
+    if (state.winnersSort === field) {
+      newOrder = state.winnersSortOrder === 'ASC' ? 'DESC' : 'ASC';
+    }
+
+    this.store.setState({
+      winnersSort: field,
+      winnersSortOrder: newOrder,
+      winnersPage: 1,
+    });
+
+    await this.renderWinners();
   }
 }
