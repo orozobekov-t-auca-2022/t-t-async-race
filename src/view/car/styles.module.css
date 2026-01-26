@@ -1,6 +1,8 @@
 button:disabled {
+  background: #999;
   cursor: not-allowed;
   border: transparent;
+  opacity: 0.5;
   background-color: #999;
 }
 
@@ -29,6 +31,9 @@ button:disabled {
 .car-name {
   flex: 1;
   font-weight: 500;
+  font-size: 24px;
+  width: 100%;
+  order: -1;
 }
 
 .car-btn {
@@ -55,7 +60,8 @@ button:disabled {
   border-color: #ef4444;
 }
 
-.car-controls, .race-section  {
+.car-controls,
+.race-section {
   display: flex;
   gap: 10px;
   align-items: center;
@@ -88,17 +94,56 @@ button:disabled {
 
 @media (max-width: 768px) {
   .car-item {
+    padding: 12px;
+  }
+
+  .car-controls,
+  .race-section {
     flex-wrap: wrap;
+  }
+
+  .car-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .flag-preview {
+    margin-right: 40px;
   }
 }
 
 @media (max-width: 500px) {
   .car-item {
     gap: 10px;
+    padding: 10px;
   }
 
-  .car-preview {
-    width: 60px;
-    height: 40px;
+  .car-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .car-btn {
+    width: 100%;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .car-name {
+    text-align: center;
+  }
+
+  .race-section {
+    justify-content: center;
+  }
+
+  .car-preview,
+  .flag-preview {
+    width: 40px;
+    height: 30px;
+  }
+
+  .flag-preview {
+    margin-right: 20px;
   }
 }

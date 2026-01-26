@@ -49,22 +49,7 @@ body {
   min-height: 500px;
 }
 
-.my-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
 
-.my-form fieldset {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 15px;
-}
-
-.my-form legend {
-  padding: 0 10px;
-  font-weight: bold;
-}
 
 .form-group {
   display: flex;
