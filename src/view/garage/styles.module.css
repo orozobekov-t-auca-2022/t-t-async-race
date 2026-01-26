@@ -42,7 +42,6 @@
   transition: border-color 0.25s;
 }
 
-
 .garage-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
