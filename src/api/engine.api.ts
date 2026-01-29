@@ -18,3 +18,25 @@ export async function startOrStopEngine(
     throw error;
   }
 }
+
+export async function switchToDriveMode(id: number): Promise<{ success: true } | 'engine failure'> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/engine?id=${id}&status=drive`, {
+      method: 'PATCH',
+    });
+
+    if (response.status === 500) {
+      return 'engine failure';
+    }
+
+    if (!response.ok) {
+      throw new Error(`Error switching to drive mode for car with id ${id}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}

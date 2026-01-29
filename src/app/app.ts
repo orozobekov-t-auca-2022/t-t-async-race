@@ -5,7 +5,7 @@ import { Router } from '../router';
 import { GarageView } from '../view/garage/garage.view';
 import { WinnersView } from '../view/winners/winners.view';
 import { createCar, updateCar, deleteCar } from '../api/garage.api';
-import { startOrStopEngine } from '../api/engine.api';
+import { startOrStopEngine, switchToDriveMode } from '../api/engine.api';
 import { getWinnerById, createWinner, updateWinner } from '../api/winner.api';
 import type { Car } from '../models/car.model';
 import showWinnerMessage from '../components/winner-message.component';
@@ -25,6 +25,7 @@ export class App {
   private readonly winnersView: WinnersView;
 
   private selectedCarId: number | null = null;
+  private stoppedCars: Set<number> = new Set();
 
   public constructor(root: HTMLDivElement) {
     this.root = root;
@@ -323,17 +324,29 @@ export class App {
     )
       return;
 
-    startButton.disabled = false;
-    stopButton.disabled = true;
     try {
       startButton.disabled = true;
+
       const { velocity, distance } = await startOrStopEngine(carId, 'started');
       const duration = distance / velocity;
+
       this.animateCar(carPreview, duration);
+
       stopButton.disabled = false;
+
+      const driveResult = await switchToDriveMode(carId);
+
+      if (driveResult === 'engine failure') {
+        this.stopCarAnimation(carPreview);
+
+        return;
+      }
+
       return duration * 1000;
     } catch (error) {
       console.error('Failed to start engine:', error);
+      startButton.disabled = false;
+      stopButton.disabled = true;
     }
   }
 
@@ -348,6 +361,22 @@ export class App {
 
     carElement.style.transition = `transform ${duration}ms linear`;
     carElement.style.transform = `translateX(${distance}px)`;
+  }
+
+  private stopCarAnimation(carElement: HTMLElement): void {
+    const parentElement = carElement.parentElement;
+    if (!parentElement) return;
+
+    const parentRect = parentElement.getBoundingClientRect();
+    const carRect = carElement.getBoundingClientRect();
+    const currentX = carRect.left - parentRect.left;
+
+    carElement.style.transition = 'none !important';
+    carElement.style.animation = 'none !important';
+
+    carElement.style.transform = `translateX(${currentX}px)`;
+
+    void carElement.offsetHeight;
   }
 
   private async handleStopEngine(carId: number): Promise<void> {
@@ -368,18 +397,27 @@ export class App {
 
     try {
       stopButton.disabled = true;
+
+      this.stoppedCars.add(carId);
+
       await startOrStopEngine(carId, 'stopped');
-      carPreview.style.transition = '';
+
+      carPreview.style.transition = 'transform 0.5s ease';
       carPreview.style.transform = 'translateX(0)';
+
       startButton.disabled = false;
     } catch (error) {
       console.error('Failed to stop engine:', error);
+      startButton.disabled = false;
+      stopButton.disabled = true;
     }
   }
 
   private async handleStartAll(): Promise<void> {
     const cars = this.garageView.getCars();
     const carTime = new Map<Car, number>();
+
+    this.stoppedCars.clear();
 
     const results = await Promise.allSettled(cars.map((car) => startOrStopEngine(car.id, 'started')));
 
@@ -396,16 +434,10 @@ export class App {
       void carElement.offsetWidth;
     });
 
-    const resetButton = this.content.querySelector('button[data-action="reset"]');
-    const startAllButton = this.content.querySelector('button[data-action="race"]');
-    if (startAllButton instanceof HTMLButtonElement) {
-      startAllButton.disabled = true;
-    }
-    if (resetButton instanceof HTMLButtonElement) {
-      resetButton.disabled = false;
-    }
-
     requestAnimationFrame(() => {
+      const drivePromises: Promise<void>[] = [];
+      let winnerDeclared = false;
+
       results.forEach((result, index) => {
         if (result.status !== 'fulfilled') return;
 
@@ -419,24 +451,36 @@ export class App {
 
         this.animateCar(carElement, duration);
         carTime.set(car, duration);
+
+        const drivePromise = switchToDriveMode(car.id).then(async (driveResult) => {
+          if (driveResult === 'engine failure') {
+            try {
+              await startOrStopEngine(car.id, 'stopped');
+            } catch (error) {
+              console.error('Failed to stop engine:', error);
+            }
+
+            this.stopCarAnimation(carElement);
+            this.stoppedCars.add(car.id);
+            carTime.delete(car);
+          } else {
+            if (!winnerDeclared) {
+              winnerDeclared = true;
+              showWinnerMessage(car.name, duration / 1000);
+            }
+
+            setTimeout(() => {
+              if (!winnerDeclared) {
+                void this.saveWinner(car.id, duration / 1000);
+              }
+              void startOrStopEngine(car.id, 'stopped').catch((error) => {
+                console.error(`Failed to stop engine for car ${car.id}:`, error);
+              });
+            }, duration);
+          }
+        });
+        drivePromises.push(drivePromise);
       });
-
-      let winner: Car | null = null;
-      let minTime = Infinity;
-
-      for (const [car, time] of carTime) {
-        if (time < minTime) {
-          minTime = time;
-          winner = car;
-        }
-      }
-
-      if (winner) {
-        setTimeout(() => {
-          showWinnerMessage(winner.name, minTime / 1000);
-          void this.saveWinner(winner.id, minTime / 1000);
-        }, minTime);
-      }
     });
   }
 
@@ -458,14 +502,6 @@ export class App {
 
   private async handleResetAll(): Promise<void> {
     await Promise.all(this.garageView.getCars().map((car) => this.handleStopEngine(car.id)));
-    const resetButton = this.content.querySelector('button[data-action="reset"]');
-    const startAllButton = this.content.querySelector('button[data-action="race"]');
-    if (startAllButton instanceof HTMLButtonElement) {
-      startAllButton.disabled = false;
-    }
-    if (resetButton instanceof HTMLButtonElement) {
-      resetButton.disabled = true;
-    }
   }
 
   private attachWinnersListeners(): void {

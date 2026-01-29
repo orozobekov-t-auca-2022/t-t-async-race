@@ -45,7 +45,6 @@ export function createForm(): HTMLFormElement {
   raceButton.dataset.action = 'race';
   const resetButton = createButton({ text: 'Reset' });
   resetButton.dataset.action = 'reset';
-  resetButton.disabled = true;
   resetButton.id = 'reset-button';
 
   const generateButton = createButton({ text: 'Generate Cars' });
