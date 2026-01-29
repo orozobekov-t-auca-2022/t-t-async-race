@@ -467,12 +467,10 @@ export class App {
             if (!winnerDeclared) {
               winnerDeclared = true;
               showWinnerMessage(car.name, duration / 1000);
+              void this.saveWinner(car.id, duration / 1000);
             }
 
             setTimeout(() => {
-              if (!winnerDeclared) {
-                void this.saveWinner(car.id, duration / 1000);
-              }
               void startOrStopEngine(car.id, 'stopped').catch((error) => {
                 console.error(`Failed to stop engine for car ${car.id}:`, error);
               });
