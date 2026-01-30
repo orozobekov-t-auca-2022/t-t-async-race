@@ -10,6 +10,10 @@ import { getWinnerById, createWinner, updateWinner } from '../api/winner.api';
 import type { Car } from '../models/car.model';
 import showWinnerMessage from '../components/winner-message.component';
 
+function isSortField(value: unknown): value is SortField {
+  return value === 'wins' || value === 'time';
+}
+
 export class App {
   private readonly store = createStore(initialState);
   private readonly router = new Router(this.store);
@@ -529,9 +533,8 @@ export class App {
       if (!(target instanceof HTMLElement)) return;
       const th = target.closest('th[data-sort]');
 
-      if (th instanceof HTMLElement && th.dataset.sort) {
-        const sortField = th.dataset.sort as SortField;
-        void this.handleSort(sortField);
+      if (th instanceof HTMLElement && th.dataset.sort && isSortField(th.dataset.sort)) {
+        void this.handleSort(th.dataset.sort);
       }
     });
   }
