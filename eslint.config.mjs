@@ -3,6 +3,9 @@ import tseslint from 'typescript-eslint';
 import unicorn from 'eslint-plugin-unicorn';
 
 export default [
+  {
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**', '*.config.js', '*.config.ts'],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
