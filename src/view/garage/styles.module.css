@@ -1,0 +1,125 @@
+.button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+.garage-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.garage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.garage-header h2 {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.garage-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: #1a1a1a;
+  color: white;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+.garage-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #999;
+}
+
+.garage-form-section {
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+}
+
+.garage-controls {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.garage-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cars-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+@media (max-width: 768px) {
+  .garage-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .garage-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 500px) {
+  .container {
+    padding: 10px;
+  }
+
+  .car-item {
+    gap: 10px;
+  }
+
+  .car-preview {
+    width: 60px;
+    height: 40px;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pagination-btn {
+    width: 100%;
+  }
+
+  .garage-controls {
+    flex-direction: column;
+  }
+
+  .garage-btn {
+    width: 100%;
+  }
+}
