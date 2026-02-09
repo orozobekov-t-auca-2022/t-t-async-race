@@ -12,6 +12,7 @@ A single-page application (SPA) for managing a garage of cars, operating their e
 - [Server setup](#server-setup)
 - [API Endpoints Used](#api-endpoints-used)
 - [Contributing](#contributing)
+- [Tests](#tests)
 
 ---
 
@@ -56,6 +57,7 @@ A single-page application (SPA) for managing a garage of cars, operating their e
   - Prettier
   - Unicorn Plugin
 - **API Client**: Fetch API
+- **Vitest**: Unit Tests
 
 ---
 
@@ -127,3 +129,14 @@ The application requires to start both frontend and backend server at the same t
 2. Create a `feature/some_feature` branch from the `develop` branch. Or if you want to fix something, then create fix branch `fix/some_fix` from the `develop` branch.
 3. Commit changes with clear messages
 4. Open a pull request from feature or fix branch to the develop branch
+
+## Tests
+
+<img width="482" height="353" alt="Снимок экрана 2026-01-31 154648" src="https://github.com/user-attachments/assets/5fb74f1e-bbd6-4aa7-9860-940ce500f3b3" />
+
+here you can see the result of running unit tests
+most of the files are covered by unit tests
+Testing technology: Vitest
+
+You can run tests by writing ```npm run test```
+
